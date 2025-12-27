@@ -49,13 +49,13 @@ const runSimulation = (config) => {
   };
 
   for (let i = 0; i < actualFans; i++) {
+    const isSeason = Math.random() < (seasonTicketPercent / 100);
     fans.push({
       id: i,
+      type: isSeason ? 'season' : 'normal',
       arrival: generators[distType](),
-      isSeasonTicket: Math.random() < (seasonTicketPercent / 100),
-      processTime: (Math.random() < (seasonTicketPercent / 100)) 
-        ? 3 + (Math.random() * 2 - 1) 
-        : 6 + (Math.random() * 6 - 3),
+      isSeasonTicket: isSeason,
+      processTime: isSeason ? 3 + (Math.random() * 2 - 1) : 6 + (Math.random() * 6 - 3),
       finishTime: null
     });
   }
@@ -65,6 +65,7 @@ const runSimulation = (config) => {
     for (let i = 0; i < 500; i++) {
       fans.push({
         id: `ultra-${i}`,
+        type: 'ultra',
         arrival: -60 * 60, 
         isSeasonTicket: false,
         processTime: 6 + (Math.random() * 6 - 3),
@@ -85,7 +86,10 @@ const runSimulation = (config) => {
   let queues = Array.from({ length: numGates }, () => []); 
   let gateFreeAt = Array(numGates).fill(START_TIME); 
   let timelineData = []; 
-  let insideCount = 0;
+  
+  // Track specific counts
+  let stats = { normal: 0, season: 0, ultra: 0, total: 0 };
+  
   let currentFanIndex = 0;
   let completedFans = [];
 
@@ -95,8 +99,11 @@ const runSimulation = (config) => {
 
   for (let t = START_TIME; t <= END_TIME; t += 60) {
     // 1. Enqueue new arrivals
+    let arrivalsThisStep = [];
     while(currentFanIndex < fans.length && fans[currentFanIndex].arrival <= t) {
       const fan = fans[currentFanIndex];
+      arrivalsThisStep.push(fan.type);
+      
       let startGate = 0, endGate = numGates;
 
       if (seasonTicketPriority) {
@@ -119,8 +126,7 @@ const runSimulation = (config) => {
     }
 
     // 2. Process Gates
-    for (let gateIdx = 0; gateIdx < queues.length; gateIdx++) {
-      const queue = queues[gateIdx];
+    queues.forEach((queue, gateIdx) => {
       while (queue.length > 0) {
         const fan = queue[0];
         const startTime = Math.max(fan.arrival, gateFreeAt[gateIdx]);
@@ -132,10 +138,14 @@ const runSimulation = (config) => {
         gateFreeAt[gateIdx] = finishTime;
         fan.finishTime = finishTime;
         completedFans.push(fan);
-        insideCount++;
+        
+        // Update specific counts
+        stats.total++;
+        stats[fan.type]++;
+        
         queue.shift(); 
       }
-    }
+    });
 
     // 3. Impatient Fans (Task 5)
     if (impatientFans) {
@@ -159,11 +169,12 @@ const runSimulation = (config) => {
     if (t >= START_TIME) {
         timelineData.push({
             time: Math.floor(t / 60),
-            arrivals: arrivalsPerMinute.get(Math.floor(t / 60)) || 0,
-            inside: insideCount, // Added for visualizer
+            arrivals: arrivalsThisStep.length,
+            arrivalTypes: arrivalsThisStep, // Store types for visualizer
+            inside: stats.total,
+            insideStats: { ...stats }, // Snapshot of current breakdown
             queueLength: queues.reduce((acc, q) => acc + q.length, 0),
-            // Store individual queue states for visualization
-            gateStats: queues.map(q => q.length) 
+            gateStats: queues.map(q => q.map(f => f.type)) // Store full queue state (fan types)
         });
     }
   }
@@ -185,5 +196,6 @@ const runSimulation = (config) => {
     }
   };
 };
+
 
 export default runSimulation;

@@ -1,70 +1,36 @@
-# Getting Started with Create React App
+# 🏟️ Galois-Field Stadium Simulation
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A discrete-event simulation application modeling the arrival and entry process of football fans at the "Galois-field" stadium.
 
-## Available Scripts
+**Hosted Live at:** [stadion-sim.dbajnok.hu](https://stadion-sim.dbajnok.hu)
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🎓 Academic Context
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This project was created for the lecture **194.076 Modeling and Simulation (VU 2,0) 2025W** at TU Wien.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+It addresses the "Football Stadium" simulation problem, where the goal is to optimize gate management and analyze queue dynamics under various constraints and stochastic arrival patterns.
 
-### `npm test`
+## 🚀 How It Works
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The application runs a time-step simulation (t = -120 min to Kickoff) directly in the browser using React. It models individual fans as agents with specific properties (arrival time, ticket type, processing speed) and simulates their interaction with stadium gates.
 
-### `npm run build`
+### Core Simulation Logic
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. **Arrival Generation**: Fans are generated based on statistical distributions (Normal, Uniform, or Beta) to model realistic crowd flows.
+2. **Queue Management**: Fans select the shortest eligible gate queue upon arrival.
+3. **Processing**: Gates process fans based on ticket type:
+   - **Standard Fans**: 6 ± 3 seconds.
+   - **Season Ticket Holders**: 3 ± 1 seconds.
+4. **Visualization**: The state of the stadium (queues, stands, arrivals) is rendered frame-by-frame on an HTML5 Canvas, synchronized with a timeline chart.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🛠️ Features & Tasks
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The simulation includes interactive toggles to solve specific tasks from the assignment:
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Task 1 (Gate Optimization)**: Adjust the number of gates ($n$) to ensure >99% of fans are inside by kickoff.
+- **Task 2 (Ultras Arrival)**: Simulates a sudden arrival of 500 away fans (Ultras) exactly 1 hour before kickoff.
+- **Task 3 (Overload)**: Tests system resilience by adding 2000 unexpected fans.
+- **Task 4 (Priority Lanes)**: Designates specific gates for Season Ticket holders to analyze the impact on average wait times.
+- **Task 5 (Impatient Fans)**: Implements "jockeying" behavior where fans switch queues if line lengths are uneven.

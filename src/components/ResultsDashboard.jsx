@@ -21,16 +21,13 @@ const ResultsDashboard = ({ results, params }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const playbackRef = useRef(null);
   
-  // Define timeline early for the hook, safe access
   const timeline = results?.timelineData || [];
 
-  // Reset playback when results change
   useEffect(() => {
     setCurrentStep(0);
     setIsPlaying(false);
   }, [results]);
 
-  // Playback Loop
   useEffect(() => {
     if (isPlaying) {
       playbackRef.current = setInterval(() => {
@@ -41,7 +38,7 @@ const ResultsDashboard = ({ results, params }) => {
           }
           return prev + 1;
         });
-      }, 100); // 100ms per simulated minute
+      }, 100); 
     }
     return () => clearInterval(playbackRef.current);
   }, [isPlaying, timeline.length]);
@@ -58,14 +55,11 @@ const ResultsDashboard = ({ results, params }) => {
   const currentData = timeline[currentStep] || timeline[0];
   const currentTime = currentData.time;
 
-  // Controls
   const togglePlay = () => setIsPlaying(!isPlaying);
   const reset = () => { setIsPlaying(false); setCurrentStep(0); };
 
-
   return (
     <>
-      {/* Stats Grid */}
       <div style={styles.statsGrid}>
         <StatsCard 
           label="Inside by Kickoff" 
@@ -90,7 +84,6 @@ const ResultsDashboard = ({ results, params }) => {
         />
       </div>
 
-      {/* Visualizer Card */}
       <div style={styles.chartCard}>
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
           <h3 style={styles.sectionTitle}><MapPin size={20} /> Stadium Simulation View</h3>
@@ -118,15 +111,19 @@ const ResultsDashboard = ({ results, params }) => {
 
         <StadiumVisualizer data={timeline} params={params} currentStep={currentStep} />
         
-        <div style={{display:'flex', gap:'15px', justifyContent:'center', marginTop:'10px', fontSize:'0.75rem', color:'#64748b'}}>
-             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#166534'}}></div> Inside</div>
-             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#ea580c'}}></div> Queue (Std)</div>
-             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#4f46e5'}}></div> Queue (Prio)</div>
-             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#3b82f6'}}></div> Arriving</div>
+        <div style={{display:'flex', flexWrap:'wrap', gap:'15px', justifyContent:'center', marginTop:'10px', fontSize:'0.75rem', color:'#64748b'}}>
+             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#0f172a'}}></div> Ultras</div>
+             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#ca8a04'}}></div> Season</div>
+             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'8px', height:'8px', borderRadius:'50%', background:'#2563eb'}}></div> Normal</div>
+             
+             {/* Divider */}
+             <div style={{width:'1px', height:'12px', background:'#cbd5e1', margin:'0 5px'}}></div>
+             
+             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'12px', height:'12px', borderRadius:'2px', background:'#a5b4fc'}}></div> Priority Gate</div>
+             <div style={{display:'flex', alignItems:'center', gap:'5px'}}><div style={{width:'12px', height:'12px', borderRadius:'2px', background:'#cbd5e1'}}></div> Standard Gate</div>
         </div>
       </div>
 
-      {/* Chart */}
       <div style={styles.chartCard}>
         <h3 style={{...styles.sectionTitle, marginBottom: '20px'}}>
           <BarChart2 size={20} /> 
@@ -143,7 +140,6 @@ const ResultsDashboard = ({ results, params }) => {
               <Legend verticalAlign="top" height={36}/>
               
               <ReferenceLine x={0} stroke="red" strokeDasharray="3 3" label="Kickoff" />
-              {/* Sync Line */}
               <ReferenceLine x={currentTime} stroke="#22c55e" strokeWidth={2} label="Current" />
               
               <Line yAxisId="left" type="monotone" dataKey="arrivals" stroke="#3b82f6" name="Arrival Rate" dot={false} strokeWidth={2} />
@@ -153,7 +149,6 @@ const ResultsDashboard = ({ results, params }) => {
         </div>
       </div>
 
-      {/* Insights */}
       {params.addUltras && (
           <div style={{...styles.insightBox, backgroundColor: '#fefce8', borderColor: '#facc15', color: '#854d0e'}}>
             <AlertTriangle size={20} style={{flexShrink: 0}} />
@@ -163,5 +158,4 @@ const ResultsDashboard = ({ results, params }) => {
     </>
   );
 };
-
 export default ResultsDashboard;
