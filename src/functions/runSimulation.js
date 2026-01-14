@@ -102,7 +102,7 @@ const runSimulation = (config) => {
   let gateFreeAt = Array(numGates).fill(START_TIME);
   let timelineData = [];
 
-  let stats = { normal: 0, season: 0, ultra: 0, total: 0 };
+  let stats = { normal: 0, season: 0, ultra: 0, total: 0, laneChanges: 0, switchedInside: 0 };
   let currentFanIndex = 0;
   let completedFans = [];
 
@@ -153,6 +153,9 @@ const runSimulation = (config) => {
 
         stats.total++;
         stats[fan.type]++;
+        if (fan.hasSwitched) {
+          stats.switchedInside++;
+        }
 
         queue.shift();
       }
@@ -172,6 +175,7 @@ const runSimulation = (config) => {
             queues[bestGate].push(fan);
             queue.splice(idx, 1);
             fan.hasSwitched = true;
+            stats.laneChanges++;
           }
         });
       });
@@ -184,7 +188,8 @@ const runSimulation = (config) => {
       inside: stats.total,
       insideStats: { ...stats },
       queueLength: queues.reduce((acc, q) => acc + q.length, 0),
-      gateStats: queues.map(q => q.map(f => f.type))
+      // Update gateStats to include fan properties needed for visualization
+      gateStats: queues.map(q => q.map(f => ({ type: f.type, hasSwitched: f.hasSwitched })))
     });
   }
 
@@ -193,11 +198,16 @@ const runSimulation = (config) => {
 
   const patientWaits = [];
   const impatientWaits = [];
+  const switchedWaits = [];
+  const notSwitchedWaits = [];
 
   completedFans.forEach(f => {
     const wait = f.finishTime - f.arrival - f.processTime;
     if (f.isImpatient) impatientWaits.push(wait);
     else patientWaits.push(wait);
+
+    if (f.hasSwitched) switchedWaits.push(wait);
+    else notSwitchedWaits.push(wait);
   });
 
   const avgPatientWait =
@@ -208,6 +218,16 @@ const runSimulation = (config) => {
   const avgImpatientWait =
     impatientWaits.length > 0
       ? impatientWaits.reduce((a, b) => a + b, 0) / impatientWaits.length
+      : 0;
+
+  const avgSwitchedWait =
+    switchedWaits.length > 0
+      ? switchedWaits.reduce((a, b) => a + b, 0) / switchedWaits.length
+      : 0;
+
+  const avgNotSwitchedWait =
+    notSwitchedWaits.length > 0
+      ? notSwitchedWaits.reduce((a, b) => a + b, 0) / notSwitchedWaits.length
       : 0;
 
   const lastFinishTime =
@@ -234,7 +254,11 @@ const runSimulation = (config) => {
       avgWaitSec: avgWaitSec.toFixed(1),
       avgPatientWaitSec: avgPatientWait.toFixed(1),
       avgImpatientWaitSec: avgImpatientWait.toFixed(1),
-      lastFanMinutesLate: lastFanMinutesLate.toFixed(1)
+      avgImpatientWaitSec: avgImpatientWait.toFixed(1),
+      lastFanMinutesLate: lastFanMinutesLate.toFixed(1),
+      totalLaneChanges: stats.laneChanges,
+      avgSwitchedWaitSec: avgSwitchedWait.toFixed(1),
+      avgNotSwitchedWaitSec: avgNotSwitchedWait.toFixed(1)
     }
   };
 };
