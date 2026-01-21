@@ -19,10 +19,41 @@ export default function App() {
   });
 
   const [results, setResults] = useState(null);
+  const [history, setHistory] = useState([]);
 
   const handleSimulate = () => {
     const data = runSimulation(params);
     setResults(data);
+
+    // Calculate metrics for history
+    const peakArrival = Math.max(...data.timelineData.map(d => d.arrivals));
+
+    const activatedTasks = [
+      params.addUltras && "Ultras",
+      params.seasonTicketPriority && "Priority",
+      params.impatientFans && "Impatient"
+    ].filter(Boolean).join(', ') || "None";
+
+    const newRun = {
+      runId: `run_${String(history.length).padStart(3, '0')}`,
+      timestamp: new Date().toLocaleString(),
+      numGates: params.numGates,
+      expectedFans: params.totalFans,
+      spread: params.distParams.stdDev,
+      distType: params.distType,
+      activatedTasks,
+      peakArrival,
+      insideByKickoff: data.stats.insideByKickoff,
+      avgWaitTime: data.stats.avgWaitSec,
+      missedKickoff: data.stats.missedKickoffCount,
+      missedKickoff: data.stats.missedKickoffCount,
+      lastEntry: data.stats.lastFanMinutesLate,
+      laneChanges: data.stats.totalLaneChanges || 0,
+      avgSwitchedWait: data.stats.avgSwitchedWaitSec,
+      avgNotSwitchedWait: data.stats.avgNotSwitchedWaitSec
+    };
+
+    setHistory(prev => [...prev, newRun]);
   };
 
   return (
@@ -32,7 +63,7 @@ export default function App() {
         <div style={styles.layout}>
           <ControlPanel params={params} setParams={setParams} onRun={handleSimulate} />
           <div style={styles.resultsPanel}>
-            <ResultsDashboard results={results} params={params} />
+            <ResultsDashboard results={results} params={params} history={history} />
           </div>
         </div>
       </div>
