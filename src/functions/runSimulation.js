@@ -277,7 +277,6 @@ const runSimulation = (config) => {
     allWaits.length > 0
       ? allWaits.reduce((a, b) => a + b, 0) / allWaits.length
       : 0;
-  const waitTimes = completedFans.map(f => f.finishTime - f.arrival - f.processTime);
   const completedSeason = completedFans.filter(f => f.type === "season");
   const waitTimesSeason = completedSeason.map(f => f.finishTime - f.arrival - f.processTime);
   const avgWaitSecSeason = waitTimesSeason.length > 0 ? (waitTimesSeason.reduce((a, b) => a + b, 0) / waitTimesSeason.length) : 0;
@@ -291,13 +290,11 @@ const runSimulation = (config) => {
       avgWaitSec: avgWaitSec.toFixed(1),
       avgPatientWaitSec: avgPatientWait.toFixed(1),
       avgImpatientWaitSec: avgImpatientWait.toFixed(1),
-      avgImpatientWaitSec: avgImpatientWait.toFixed(1),
       lastFanMinutesLate: lastFanMinutesLate.toFixed(1),
       totalLaneChanges: stats.laneChanges,
       avgSwitchedWaitSec: avgSwitchedWait.toFixed(1),
       avgNotSwitchedWaitSec: avgNotSwitchedWait.toFixed(1),
-      avgWaitSecSeason: avgWaitSecSeason,
-      lastFanMinutesLate: lastFanMinutesLate.toFixed(1)
+      avgWaitSecSeason: avgWaitSecSeason.toFixed(1),
     }
   };
 };

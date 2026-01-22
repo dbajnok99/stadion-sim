@@ -47,7 +47,6 @@ export default function App() {
       insideByKickoff: data.stats.insideByKickoff,
       avgWaitTime: data.stats.avgWaitSec,
       missedKickoff: data.stats.missedKickoffCount,
-      missedKickoff: data.stats.missedKickoffCount,
       lastEntry: data.stats.lastFanMinutesLate,
       laneChanges: data.stats.totalLaneChanges || 0,
       avgSwitchedWait: data.stats.avgSwitchedWaitSec,

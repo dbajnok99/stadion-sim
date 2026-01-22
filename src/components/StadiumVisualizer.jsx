@@ -91,44 +91,48 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
     const gateAreaHeight = 30;
     const numGates = params.numGates;
     const numSeasonGates = params.numSeasonGates;
-    const gateWidth = (width - 40) / numGates;
+    const gateWidth = Math.max(5, (width - 40) / numGates);
 
-    for (let i = 0; i < numGates; i++) {
-      const x = 20 + i * gateWidth;
-      const isPriority = i < numSeasonGates;
-      
-      // Gate Box
-      ctx.fillStyle = isPriority ? '#a5b4fc' : '#cbd5e1';
-      ctx.fillRect(x + 2, gateY, gateWidth - 4, gateAreaHeight);
-      ctx.fillStyle = '#475569';
-      ctx.font = '10px sans-serif';
-      ctx.fillText(i + 1, x + gateWidth / 2 - 3, gateY + 18);
+    if (stepData.gateStats && stepData.gateStats.length > 0) {
+      for (let i = 0; i < numGates; i++) {
+        const x = 20 + i * gateWidth;
+        const isPriority = i < numSeasonGates;
+        
+        // Gate Box
+        ctx.fillStyle = isPriority ? '#a5b4fc' : '#cbd5e1';
+        ctx.fillRect(x + 2, gateY, Math.max(3, gateWidth - 4), gateAreaHeight);
+        ctx.fillStyle = '#475569';
+        ctx.font = '10px sans-serif';
+        if (gateWidth > 8) {
+          ctx.fillText(i + 1, x + gateWidth / 2 - 3, gateY + 18);
+        }
 
-      // --- 5. Draw Queues ---
-      const queueFans = stepData.gateStats[i] || [];
-      const dotsPerCol = 15;
-      const qDotSize = 2;
-      const qGap = 2;
+        // --- 5. Draw Queues ---
+        const queueFans = (stepData.gateStats[i] && Array.isArray(stepData.gateStats[i])) ? stepData.gateStats[i] : [];
+        const dotsPerCol = 15;
+        const qDotSize = 2;
+        const qGap = 2;
 
-      const visualQ = Math.min(queueFans.length, 120);
+        const visualQ = Math.min(queueFans.length, 120);
 
-      for (let q = 0; q < visualQ; q++) {
-        const col = Math.floor(q / dotsPerCol);
-        const row = q % dotsPerCol;
+        for (let q = 0; q < visualQ; q++) {
+          const col = Math.floor(q / dotsPerCol);
+          const row = q % dotsPerCol;
 
-        const qX = x + 4 + col * (qDotSize * 2 + 1);
-        const qY = gateY + gateAreaHeight + 5 + row * (qDotSize * 2 + qGap);
+          const qX = x + 4 + col * (qDotSize * 2 + 1);
+          const qY = gateY + gateAreaHeight + 5 + row * (qDotSize * 2 + qGap);
 
-        if (qX < x + gateWidth - 2) {
-          const fanData = queueFans[q];
-          // Backward compatibility check if just a string
-          const type = fanData.type || fanData;
-          const hasSwitched = fanData.hasSwitched || false;
+          if (qX < x + gateWidth - 2) {
+            const fanData = queueFans[q];
+            // Backward compatibility check if just a string
+            const type = fanData.type || fanData;
+            const hasSwitched = fanData.hasSwitched || false;
 
-          ctx.fillStyle = hasSwitched ? '#dc2626' : getColor(type); // Red-600 if switched
-          ctx.beginPath();
-          ctx.arc(qX, qY, qDotSize, 0, Math.PI * 2);
-          ctx.fill();
+            ctx.fillStyle = hasSwitched ? '#dc2626' : getColor(type); // Red-600 if switched
+            ctx.beginPath();
+            ctx.arc(qX, qY, qDotSize, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
     }

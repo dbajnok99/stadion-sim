@@ -1,7 +1,9 @@
 const formatWaitTime = (seconds) => {
-  if (seconds < 60) return `${seconds.toFixed(1)} sec`;
-  const mins = Math.floor(seconds / 60);
-  const secs = (seconds % 60).toFixed(0);
+  const numSeconds = Number(seconds);
+  if (!Number.isFinite(numSeconds)) return 'N/A';
+  if (numSeconds < 60) return `${numSeconds.toFixed(1)} sec`;
+  const mins = Math.floor(numSeconds / 60);
+  const secs = (numSeconds % 60).toFixed(0);
   return `${mins} min ${secs} sec`;
 };
 
