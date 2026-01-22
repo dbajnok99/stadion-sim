@@ -90,15 +90,13 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
     const gateY = height * 0.45;
     const gateAreaHeight = 30;
     const numGates = params.numGates;
+    const numSeasonGates = params.numSeasonGates;
     const gateWidth = (width - 40) / numGates;
-    const numPriority = params.seasonTicketPriority
-      ? Math.max(1, Math.round(numGates * (params.seasonTicketPercent / 100)))
-      : 0;
 
     for (let i = 0; i < numGates; i++) {
       const x = 20 + i * gateWidth;
-      const isPriority = i < numPriority;
-
+      const isPriority = i < numSeasonGates;
+      
       // Gate Box
       ctx.fillStyle = isPriority ? '#a5b4fc' : '#cbd5e1';
       ctx.fillRect(x + 2, gateY, gateWidth - 4, gateAreaHeight);
@@ -157,9 +155,9 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
     // Labels
     ctx.font = '10px sans-serif';
     ctx.fillStyle = '#0f172a'; ctx.fillText("ULTRAS", 10, 15);
-    ctx.fillStyle = '#b45309'; ctx.fillText("VIP/SEASON", width - 70, 15);
-    ctx.fillStyle = '#1e3a8a'; ctx.fillText("GENERAL", width / 2 - 30, 15);
     ctx.fillStyle = '#dc2626'; ctx.fillText("SWITCHED", width / 2 + 30, 15);
+    ctx.fillStyle = '#b45309'; ctx.fillText("SEASON", width - 70, 15);
+    ctx.fillStyle = '#1e3a8a'; ctx.fillText("GENERAL", width/2 - 20, 15);
 
   }, [data, params, currentStep]);
 
