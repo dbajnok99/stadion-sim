@@ -3,6 +3,7 @@ import generateBeta from './generateBeta';
 const runSimulation = (config) => {
   const {
     numGates,
+    numSeasonGates,
     totalFans,
     addUltras,
     overloadMode,
@@ -22,7 +23,20 @@ const runSimulation = (config) => {
   let fans = [];
 
   const generators = {
-    normal: () => {
+    normal: (type) => {
+      if (type==="season"){
+        const meanSec = distParams.seasonMean * 60;
+        const stdDevSec = distParams.stdDev * 60;
+        let t, attempts = 0;
+        do {
+          let u = 0, v = 0;
+          while(u === 0) u = Math.random(); while(v === 0) v = Math.random();
+          const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+          t = Math.floor(z * stdDevSec + meanSec);
+          attempts++;
+        } while ((t < START_TIME || t > KICKOFF) && attempts < 50);
+        return attempts >= 50 ? Math.min(KICKOFF, Math.max(START_TIME, t)) : t;
+      }
       const meanSec = distParams.mean * 60;
       const stdDevSec = distParams.stdDev * 60;
       let t, attempts = 0;
@@ -66,7 +80,7 @@ const runSimulation = (config) => {
     fans.push({
       id: i,
       type: isSeason ? 'season' : 'normal',
-      arrival: arrivalTime,
+      arrival: generators[distType](isSeason ? 'season' : 'normal'),
       isSeasonTicket: isSeason,
       processTime: isSeason
         ? 3 + (Math.random() * 2 - 1)
@@ -106,9 +120,8 @@ const runSimulation = (config) => {
   let currentFanIndex = 0;
   let completedFans = [];
 
-  const numPriorityGates = seasonTicketPriority
-    ? Math.max(1, Math.round(numGates * (seasonTicketPercent / 100)))
-    : 0;
+  // Ensure numPriorityGates is defined as intended (using your variable)
+  const numPriorityGates = numSeasonGates; 
 
   // --- Time loop ---
   for (let t = START_TIME; t <= END_TIME; t += 60) {
@@ -117,23 +130,43 @@ const runSimulation = (config) => {
     while (currentFanIndex < fans.length && fans[currentFanIndex].arrival <= t) {
       const fan = fans[currentFanIndex];
       arrivalsThisStep.push(fan.type);
-
+      
       let startGate = 0;
-      if (seasonTicketPriority && !fan.isSeasonTicket) {
-        startGate = numPriorityGates;
+      let endGate = numGates;
+
+      // --- LOGIC CHANGE START ---
+      if (seasonTicketPriority && numPriorityGates > 0) {
+        if (fan.isSeasonTicket) {
+           // Season fans ONLY use priority gates
+           startGate = 0;
+           endGate = numPriorityGates;
+        } else {
+           // Normal fans use the remaining gates
+           startGate = numPriorityGates;
+           endGate = numGates; 
+        }
       }
+      // --- LOGIC CHANGE END ---
 
-      let bestGate = startGate >= numGates ? 0 : startGate;
-      let minLength = queues[bestGate].length;
+      // (e.g., normal fan but 100% of gates are priority)
+      if (startGate >= numGates) startGate = 0;
 
-      for (let g = startGate; g < numGates; g++) {
-        if (queues[g].length < minLength) {
+      let bestGate = startGate;
+      
+      // Safety check for queue existence
+      let minLength = queues[bestGate] ? queues[bestGate].length : 999999;
+
+      // Iterate ONLY through the gates allowed for this specific fan type
+      for(let g = startGate; g < endGate; g++) {
+        if (queues[g] && queues[g].length < minLength) {
           bestGate = g;
           minLength = queues[g].length;
         }
       }
-
-      queues[bestGate].push(fan);
+      
+      if (queues[bestGate]) {
+        queues[bestGate].push(fan);
+      }
       currentFanIndex++;
     }
 
@@ -244,6 +277,10 @@ const runSimulation = (config) => {
     allWaits.length > 0
       ? allWaits.reduce((a, b) => a + b, 0) / allWaits.length
       : 0;
+  const waitTimes = completedFans.map(f => f.finishTime - f.arrival - f.processTime);
+  const completedSeason = completedFans.filter(f => f.type === "season");
+  const waitTimesSeason = completedSeason.map(f => f.finishTime - f.arrival - f.processTime);
+  const avgWaitSecSeason = waitTimesSeason.length > 0 ? (waitTimesSeason.reduce((a, b) => a + b, 0) / waitTimesSeason.length) : 0;
 
   return {
     timelineData,
@@ -258,7 +295,9 @@ const runSimulation = (config) => {
       lastFanMinutesLate: lastFanMinutesLate.toFixed(1),
       totalLaneChanges: stats.laneChanges,
       avgSwitchedWaitSec: avgSwitchedWait.toFixed(1),
-      avgNotSwitchedWaitSec: avgNotSwitchedWait.toFixed(1)
+      avgNotSwitchedWaitSec: avgNotSwitchedWait.toFixed(1),
+      avgWaitSecSeason: avgWaitSecSeason,
+      lastFanMinutesLate: lastFanMinutesLate.toFixed(1)
     }
   };
 };

@@ -23,6 +23,11 @@ const ControlPanel = ({ params, setParams, onRun }) => {
       </div>
 
       <div style={styles.inputGroup}>
+        <label style={styles.label}>Number of FastLane Gates: <span style={{color: '#2563eb'}}>{params.numSeasonGates}</span></label>
+        <input type="range" min="0" max="25" value={params.numSeasonGates} onChange={e => setParams({...params, numSeasonGates: Number(e.target.value)})} style={styles.slider} />
+      </div>
+
+      <div style={styles.inputGroup}>
         <label style={styles.label}>Expected Fans: <span style={{color: '#2563eb'}}>{params.totalFans}</span></label>
         <input type="range" min="1000" max="10000" step="100" value={params.totalFans} onChange={e => setParams({...params, totalFans: Number(e.target.value)})} style={styles.slider} />
       </div>

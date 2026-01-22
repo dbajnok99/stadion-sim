@@ -73,9 +73,14 @@ const ResultsDashboard = ({ results, params, history }) => {
           value={formatWaitTime(results.stats.avgWaitSec)}
           type="info"
         />
-        <StatsCard
-          label="Missed Kickoff"
-          value={`${results.stats.missedKickoffCount} fans`}
+        <StatsCard 
+          label="Avg Wait Time ST Holders" 
+          value={formatWaitTime(results.stats.avgWaitSecSeason)} 
+          type="info"
+        />
+        <StatsCard 
+          label="Missed Kickoff" 
+          value={`${results.stats.missedKickoffCount} fans`} 
           type="warning"
         />
         <StatsCard

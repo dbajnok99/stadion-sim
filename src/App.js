@@ -8,6 +8,7 @@ import runSimulation from './functions/runSimulation';
 export default function App() {
   const [params, setParams] = useState({
     numGates: 6,
+    numSeasonGates: 0,
     totalFans: 6000,
     addUltras: false,
     overloadMode: false,
@@ -15,7 +16,7 @@ export default function App() {
     seasonTicketPriority: false,
     impatientFans: false,
     distType: 'normal',
-    distParams: { mean: -45, stdDev: 10, start: -120, end: 0, alpha: 5.0, beta: 2.0 }
+    distParams: { mean: -45, seasonMean: -45, stdDev: 10, start: -120, end: 0, alpha: 5.0, beta: 2.0 }
   });
 
   const [results, setResults] = useState(null);

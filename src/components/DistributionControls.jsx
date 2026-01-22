@@ -11,6 +11,10 @@ const DistributionControls = ({ distType, distParams, onUpdate }) => {
           <label style={{...styles.label, fontSize: '0.75rem'}}>Spread (StdDev): {distParams.stdDev} min</label>
           <input type="range" min="5" max="60" value={distParams.stdDev} onChange={e => onUpdate('stdDev', e.target.value)} style={styles.slider} />
         </div>
+        <div style={{marginBottom: '10px'}}>
+          <label style={{...styles.label, fontSize: '0.75rem'}}>Peak Arrival (Seasonal Ticket): {distParams.seasonMean} min</label>
+          <input type="range" min="-120" max="0" value={distParams.seasonMean} onChange={e => onUpdate('seasonMean', e.target.value)} style={styles.slider} />
+        </div>
       </>
     );
   }
