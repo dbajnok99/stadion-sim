@@ -24,13 +24,13 @@ const runSimulation = (config) => {
 
   const generators = {
     normal: (type) => {
-      if (type==="season"){
+      if (type === "season") {
         const meanSec = distParams.seasonMean * 60;
         const stdDevSec = distParams.stdDev * 60;
         let t, attempts = 0;
         do {
           let u = 0, v = 0;
-          while(u === 0) u = Math.random(); while(v === 0) v = Math.random();
+          while (u === 0) u = Math.random(); while (v === 0) v = Math.random();
           const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
           t = Math.floor(z * stdDevSec + meanSec);
           attempts++;
@@ -121,7 +121,7 @@ const runSimulation = (config) => {
   let completedFans = [];
 
   // Ensure numPriorityGates is defined as intended (using your variable)
-  const numPriorityGates = numSeasonGates; 
+  const numPriorityGates = numSeasonGates;
 
   // --- Time loop ---
   for (let t = START_TIME; t <= END_TIME; t += 60) {
@@ -130,20 +130,20 @@ const runSimulation = (config) => {
     while (currentFanIndex < fans.length && fans[currentFanIndex].arrival <= t) {
       const fan = fans[currentFanIndex];
       arrivalsThisStep.push(fan.type);
-      
+
       let startGate = 0;
       let endGate = numGates;
 
       // --- LOGIC CHANGE START ---
       if (seasonTicketPriority && numPriorityGates > 0) {
         if (fan.isSeasonTicket) {
-           // Season fans ONLY use priority gates
-           startGate = 0;
-           endGate = numPriorityGates;
+          // Season fans ONLY use priority gates
+          startGate = 0;
+          endGate = numPriorityGates;
         } else {
-           // Normal fans use the remaining gates
-           startGate = numPriorityGates;
-           endGate = numGates; 
+          // Normal fans use the remaining gates
+          startGate = numPriorityGates;
+          endGate = numGates;
         }
       }
       // --- LOGIC CHANGE END ---
@@ -152,18 +152,18 @@ const runSimulation = (config) => {
       if (startGate >= numGates) startGate = 0;
 
       let bestGate = startGate;
-      
+
       // Safety check for queue existence
       let minLength = queues[bestGate] ? queues[bestGate].length : 999999;
 
       // Iterate ONLY through the gates allowed for this specific fan type
-      for(let g = startGate; g < endGate; g++) {
+      for (let g = startGate; g < endGate; g++) {
         if (queues[g] && queues[g].length < minLength) {
           bestGate = g;
           minLength = queues[g].length;
         }
       }
-      
+
       if (queues[bestGate]) {
         queues[bestGate].push(fan);
       }
@@ -197,20 +197,52 @@ const runSimulation = (config) => {
     // ✅ Task 5: individual impatient fans switching queues once
     if (impatientFans) {
       queues.forEach((queue, gateIdx) => {
-        queue.forEach((fan, idx) => {
-          if (!fan.isImpatient || fan.hasSwitched) return;
-          if (t - fan.arrival < 10 * 60) return; // waited < 10 min
+        // Iterate backwards to safely splice
+        for (let i = queue.length - 1; i >= 0; i--) {
+          const fan = queue[i];
+          if (!fan.isImpatient || fan.hasSwitched) continue;
+          if (t - fan.arrival < 10 * 60) continue; // waited < 10 min
 
-          const lengths = queues.map(q => q.length);
-          const bestGate = lengths.indexOf(Math.min(...lengths));
+          // Determine allowed gates for this fan
+          let startGate = 0;
+          let endGate = numGates;
 
-          if (bestGate !== gateIdx) {
+          if (seasonTicketPriority && numPriorityGates > 0) {
+            if (fan.isSeasonTicket) {
+              startGate = 0;
+              endGate = numPriorityGates;
+            } else {
+              startGate = numPriorityGates;
+              endGate = numGates;
+            }
+          }
+
+          // specific check logic: find best gate in ALLOWED range
+          let bestGate = -1;
+          let minLen = 999999;
+
+          // Only look at allowed gates
+          for (let g = startGate; g < endGate; g++) {
+            if (queues[g].length < minLen) {
+              minLen = queues[g].length;
+              bestGate = g;
+            }
+          }
+
+          // If we found a valid gate and it is better (and different)
+          // Note: simplest is just check if bestGate != gateIdx. 
+          // However, gateIdx must be in the allowed range too? 
+          // Ideally yes, but if they are already in a wrong queue, they should probably move.
+          // Assuming initial placement was correct, gateIdx is in range.
+
+          if (bestGate !== -1 && bestGate !== gateIdx) {
+            // Move fan
             queues[bestGate].push(fan);
-            queue.splice(idx, 1);
+            queue.splice(i, 1);
             fan.hasSwitched = true;
             stats.laneChanges++;
           }
-        });
+        }
       });
     }
 
@@ -285,16 +317,16 @@ const runSimulation = (config) => {
     timelineData,
     stats: {
       totalFans: fans.length,
-      insideByKickoff: ((fans.length - missedKickoffCount) / fans.length * 100).toFixed(1),
+      insideByKickoff: parseFloat(((fans.length - missedKickoffCount) / fans.length * 100).toFixed(1)),
       missedKickoffCount,
-      avgWaitSec: avgWaitSec.toFixed(1),
-      avgPatientWaitSec: avgPatientWait.toFixed(1),
-      avgImpatientWaitSec: avgImpatientWait.toFixed(1),
-      lastFanMinutesLate: lastFanMinutesLate.toFixed(1),
+      avgWaitSec: parseFloat(avgWaitSec.toFixed(2)),
+      avgPatientWaitSec: parseFloat(avgPatientWait.toFixed(2)),
+      avgImpatientWaitSec: parseFloat(avgImpatientWait.toFixed(2)),
+      lastFanMinutesLate: parseFloat(lastFanMinutesLate.toFixed(2)),
       totalLaneChanges: stats.laneChanges,
-      avgSwitchedWaitSec: avgSwitchedWait.toFixed(1),
-      avgNotSwitchedWaitSec: avgNotSwitchedWait.toFixed(1),
-      avgWaitSecSeason: avgWaitSecSeason.toFixed(1),
+      avgSwitchedWaitSec: parseFloat(avgSwitchedWait.toFixed(2)),
+      avgNotSwitchedWaitSec: parseFloat(avgNotSwitchedWait.toFixed(1)),
+      avgWaitSecSeason: parseFloat(avgWaitSecSeason.toFixed(1)),
     }
   };
 };
