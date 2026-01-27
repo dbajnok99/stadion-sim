@@ -51,7 +51,7 @@ export default function SimulationHistoryTable({ history }) {
         // Construct CSV
         const csvContent = [
             headers.join(','),
-            ...rows.map(r => r.map(c => `"${c}"`).join(',')) // Quote values to handle commas in text
+            ...rows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`).join(','))
         ].join('\n');
 
         // Download
