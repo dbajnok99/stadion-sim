@@ -10,7 +10,6 @@ export default function SimulationHistoryTable({ history }) {
     const handleExportCSV = () => {
         if (history.length === 0) return;
 
-        // Define headers
         const headers = [
             "Run ID",
             "Timestamp",
@@ -29,7 +28,6 @@ export default function SimulationHistoryTable({ history }) {
             "Avg Wait (Static)"
         ];
 
-        // Map rows
         const rows = history.map(run => [
             run.runId,
             run.timestamp,
@@ -48,13 +46,11 @@ export default function SimulationHistoryTable({ history }) {
             run.avgNotSwitchedWait
         ]);
 
-        // Construct CSV
         const csvContent = [
             headers.join(','),
             ...rows.map(r => r.map(c => typeof c === 'number' ? c : `"${c}"`).join(','))
         ].join('\n');
 
-        // Download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');

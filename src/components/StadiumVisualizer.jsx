@@ -20,7 +20,7 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Clear
+
     ctx.clearRect(0, 0, width, height);
 
     const stepData = data[currentStep];
@@ -28,7 +28,7 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
 
     // --- 1. Draw Stands (Concrete Areas) ---
     // Left Stand (Ultras)
-    ctx.fillStyle = '#e2e8f0'; // concrete/slate-200
+    ctx.fillStyle = '#e2e8f0';
     ctx.fillRect(0, 0, width * 0.25, height * 0.45);
 
     // Right Stand (Season)
@@ -36,13 +36,13 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
     ctx.fillRect(width * 0.75, 0, width * 0.25, height * 0.45);
 
     // Center Stand (Normal)
-    ctx.fillStyle = '#f1f5f9'; // slightly lighter concrete
-    ctx.fillRect(width * 0.25, 0, width * 0.5, height * 0.15); // Top strip
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(width * 0.25, 0, width * 0.5, height * 0.15);
 
     // --- 2. Draw Pitch (Green Field) ---
     const fieldY = height * 0.15;
     const fieldHeight = height * 0.3;
-    ctx.fillStyle = '#15803d'; // green-700
+    ctx.fillStyle = '#15803d';
     ctx.fillRect(width * 0.25, fieldY, width * 0.5, fieldHeight);
 
     // Pitch markings
@@ -69,19 +69,12 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
       }
     };
 
-    // Draw Ultras (Left Stand - Black/Red)
     drawGroup(ultra, getColor('ultra'), 10, 10, width * 0.25 - 20, height * 0.45 - 20);
 
-    // Draw Season (Right Stand - Gold)
     drawGroup(season, getColor('season'), width * 0.75 + 10, 10, width * 0.25 - 20, height * 0.45 - 20);
 
-    // Draw Normal (Center Stand & overflow - Blue)
-    // We put them in the top strip
-    // Reduced by switched count to keep visual density accurate
     drawGroup(Math.max(0, normal - (switchedInside || 0)), getColor('normal'), width * 0.25 + 10, 5, width * 0.5 - 20, height * 0.15 - 10);
 
-    // Draw Switched (Red - mixed in center or overlaid)
-    // Placing them slightly offset or same area to mimic mixing
     if (switchedInside > 0) {
       drawGroup(switchedInside, '#dc2626', width * 0.25 + 10, 5, width * 0.5 - 20, height * 0.15 - 10);
     }
@@ -97,8 +90,7 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
       for (let i = 0; i < numGates; i++) {
         const x = 20 + i * gateWidth;
         const isPriority = i < numSeasonGates;
-        
-        // Gate Box
+
         ctx.fillStyle = isPriority ? '#a5b4fc' : '#cbd5e1';
         ctx.fillRect(x + 2, gateY, Math.max(3, gateWidth - 4), gateAreaHeight);
         ctx.fillStyle = '#475569';
@@ -107,7 +99,6 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
           ctx.fillText(i + 1, x + gateWidth / 2 - 3, gateY + 18);
         }
 
-        // --- 5. Draw Queues ---
         const queueFans = (stepData.gateStats[i] && Array.isArray(stepData.gateStats[i])) ? stepData.gateStats[i] : [];
         const dotsPerCol = 15;
         const qDotSize = 2;
@@ -124,7 +115,6 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
 
           if (qX < x + gateWidth - 2) {
             const fanData = queueFans[q];
-            // Backward compatibility check if just a string
             const type = fanData.type || fanData;
             const hasSwitched = fanData.hasSwitched || false;
 
@@ -144,7 +134,7 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
       const type = arrivalTypes[i];
       const pos = getStablePosition(i, currentStep, width - 40, 40);
 
-      ctx.fillStyle = getColor(type); // Color based on fan type
+      ctx.fillStyle = getColor(type);
       ctx.beginPath();
       ctx.arc(20 + pos.x, height - 20 - (pos.y % 30), 2, 0, Math.PI * 2);
       ctx.fill();
@@ -156,12 +146,11 @@ const StadiumVisualizer = ({ data, params, currentStep }) => {
       ctx.fillText(`Arriving: ${arrivalTypes.length}/min`, width / 2 - 40, height - 5);
     }
 
-    // Labels
     ctx.font = '10px sans-serif';
     ctx.fillStyle = '#0f172a'; ctx.fillText("ULTRAS", 10, 15);
     ctx.fillStyle = '#dc2626'; ctx.fillText("SWITCHED", width / 2 + 30, 15);
     ctx.fillStyle = '#b45309'; ctx.fillText("SEASON", width - 70, 15);
-    ctx.fillStyle = '#1e3a8a'; ctx.fillText("GENERAL", width/2 - 20, 15);
+    ctx.fillStyle = '#1e3a8a'; ctx.fillText("GENERAL", width / 2 - 20, 15);
 
   }, [data, params, currentStep]);
 
