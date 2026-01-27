@@ -87,7 +87,7 @@ const runSimulation = (config) => {
         : 6 + (Math.random() * 6 - 3),
       finishTime: null,
 
-      // ✅ Task 5: impatient fan attributes
+      // Task 5: impatient fan attributes
       isImpatient: Math.random() < 0.3, // 30% impatient
       hasSwitched: false
     });
@@ -120,12 +120,9 @@ const runSimulation = (config) => {
   let currentFanIndex = 0;
   let completedFans = [];
 
-  // Ensure numPriorityGates is defined as intended (using your variable)
   const numPriorityGates = numSeasonGates;
 
-  // --- Time loop ---
   for (let t = START_TIME; t <= END_TIME; t += 60) {
-    // 1. Enqueue arrivals
     let arrivalsThisStep = [];
     while (currentFanIndex < fans.length && fans[currentFanIndex].arrival <= t) {
       const fan = fans[currentFanIndex];
@@ -134,29 +131,23 @@ const runSimulation = (config) => {
       let startGate = 0;
       let endGate = numGates;
 
-      // --- LOGIC CHANGE START ---
       if (seasonTicketPriority && numPriorityGates > 0) {
         if (fan.isSeasonTicket) {
-          // Season fans ONLY use priority gates
           startGate = 0;
           endGate = numPriorityGates;
         } else {
-          // Normal fans use the remaining gates
           startGate = numPriorityGates;
           endGate = numGates;
         }
       }
       // --- LOGIC CHANGE END ---
 
-      // (e.g., normal fan but 100% of gates are priority)
       if (startGate >= numGates) startGate = 0;
 
       let bestGate = startGate;
 
-      // Safety check for queue existence
       let minLength = queues[bestGate] ? queues[bestGate].length : 999999;
 
-      // Iterate ONLY through the gates allowed for this specific fan type
       for (let g = startGate; g < endGate; g++) {
         if (queues[g] && queues[g].length < minLength) {
           bestGate = g;
@@ -201,9 +192,8 @@ const runSimulation = (config) => {
         for (let i = queue.length - 1; i >= 0; i--) {
           const fan = queue[i];
           if (!fan.isImpatient || fan.hasSwitched) continue;
-          if (t - fan.arrival < 10 * 60) continue; // waited < 10 min
+          if (t - fan.arrival < 10 * 60) continue;
 
-          // Determine allowed gates for this fan
           let startGate = 0;
           let endGate = numGates;
 
@@ -217,11 +207,9 @@ const runSimulation = (config) => {
             }
           }
 
-          // specific check logic: find best gate in ALLOWED range
           let bestGate = -1;
           let minLen = 999999;
 
-          // Only look at allowed gates
           for (let g = startGate; g < endGate; g++) {
             if (queues[g].length < minLen) {
               minLen = queues[g].length;
@@ -253,7 +241,6 @@ const runSimulation = (config) => {
       inside: stats.total,
       insideStats: { ...stats },
       queueLength: queues.reduce((acc, q) => acc + q.length, 0),
-      // Update gateStats to include fan properties needed for visualization
       gateStats: queues.map(q => q.map(f => ({ type: f.type, hasSwitched: f.hasSwitched })))
     });
   }
