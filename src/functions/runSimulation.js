@@ -217,11 +217,6 @@ const runSimulation = (config) => {
             }
           }
 
-          // If we found a valid gate and it is better (and different)
-          // Note: simplest is just check if bestGate != gateIdx. 
-          // However, gateIdx must be in the allowed range too? 
-          // Ideally yes, but if they are already in a wrong queue, they should probably move.
-          // Assuming initial placement was correct, gateIdx is in range.
 
           if (bestGate !== -1 && bestGate !== gateIdx) {
             // Move fan
