@@ -50,8 +50,12 @@ export default function App() {
       lastEntry: data.stats.lastFanMinutesLate,
       laneChanges: data.stats.totalLaneChanges || 0,
       avgSwitchedWait: data.stats.avgSwitchedWaitSec,
-      avgNotSwitchedWait: data.stats.avgNotSwitchedWaitSec
+      avgNotSwitchedWait: data.stats.avgNotSwitchedWaitSec,
+
+      // ✅ add this
+      timelineData: data.timelineData
     };
+
 
     setHistory(prev => [...prev, newRun]);
   };
