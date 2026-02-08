@@ -37,36 +37,46 @@ export default function SimulationHistoryTable({ history }) {
       "Run ID",
       "Timestamp",
       "Gates",
+      "VIP Gates",
       "Expected Fans",
       "Spread",
       "Dist Type",
       "Activated Tasks",
       "Peak Arrival",
+      "Peak VIP Arrival",
       "Inside by Kickoff (%)",
       "Avg Wait (s)",
       "Missed Kickoff",
       "Last Entry (min)",
       "Lane Changes",
       "Avg Wait (Switched)",
-      "Avg Wait (Static)"
+      "Avg Wait (Static)",
+      "Avg Wait (VIP)",
+      "Set Arrival Mean",
+      "Set VIP Arrival Mean",
     ];
 
     const rows = history.map(run => [
       run.runId,
       run.timestamp,
       run.numGates,
+      run.numSeasonGates,
       run.expectedFans,
       run.spread,
       run.distType,
       run.activatedTasks,
       run.peakArrival,
+      run.peakSeasonalArrival,
       run.insideByKickoff,
       run.avgWaitTime,
       run.missedKickoff,
       run.lastEntry,
       run.laneChanges,
       run.avgSwitchedWait,
-      run.avgNotSwitchedWait
+      run.avgNotSwitchedWait,
+      run.avgSeasonalWait,
+      run.setMean,
+      run.setVIPMean,
     ]);
 
     const fname = `simulation_history_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`;
@@ -142,6 +152,7 @@ export default function SimulationHistoryTable({ history }) {
               <th style={thStyle}>Changes</th>
               <th style={thStyle}>Wait(Switch)</th>
               <th style={thStyle}>Wait(Static)</th>
+              <th style={thStyle}>Wait(VIP)</th>
               <th style={thStyle}>Timeline</th>
             </tr>
           </thead>
@@ -169,6 +180,7 @@ export default function SimulationHistoryTable({ history }) {
                 <td style={tdStyle}>{run.laneChanges}</td>
                 <td style={tdStyle}>{run.avgSwitchedWait}s</td>
                 <td style={tdStyle}>{run.avgNotSwitchedWait}s</td>
+                <td style={tdStyle}>{run.avgSeasonalWait}s</td>
 
                 <td style={tdStyle}>
                   <button
