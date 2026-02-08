@@ -124,9 +124,13 @@ const runSimulation = (config) => {
 
   for (let t = START_TIME; t <= END_TIME; t += 60) {
     let arrivalsThisStep = [];
+    let arrivalsSeasonThisStep = [];
     while (currentFanIndex < fans.length && fans[currentFanIndex].arrival <= t) {
       const fan = fans[currentFanIndex];
       arrivalsThisStep.push(fan.type);
+      if(fan.type === 'season'){
+        arrivalsSeasonThisStep.push(fan.type)
+      }
 
       let startGate = 0;
       let endGate = numGates;
@@ -233,6 +237,7 @@ const runSimulation = (config) => {
       time: Math.floor(t / 60),
       arrivals: arrivalsThisStep.length,
       arrivalTypes: arrivalsThisStep,
+      arrivalsSeasonal: arrivalsSeasonThisStep.length,
       inside: stats.total,
       insideStats: { ...stats },
       queueLength: queues.reduce((acc, q) => acc + q.length, 0),
@@ -247,6 +252,7 @@ const runSimulation = (config) => {
   const impatientWaits = [];
   const switchedWaits = [];
   const notSwitchedWaits = [];
+  const seasonalWaits = [];
 
   completedFans.forEach(f => {
     const wait = f.finishTime - f.arrival - f.processTime;
@@ -255,6 +261,8 @@ const runSimulation = (config) => {
 
     if (f.hasSwitched) switchedWaits.push(wait);
     else notSwitchedWaits.push(wait);
+
+    if (f.isSeasonTicket) seasonalWaits.push(wait);
   });
 
   const avgPatientWait =
@@ -280,6 +288,11 @@ const runSimulation = (config) => {
   const lastFinishTime =
     completedFans.length > 0
       ? Math.max(...completedFans.map(f => f.finishTime))
+      : 0;
+  
+  const avgSeasonalWait =
+    seasonalWaits.length > 0
+      ? seasonalWaits.reduce((a, b) => a + b, 0) / seasonalWaits.length
       : 0;
 
   const lastFanMinutesLate =
@@ -309,6 +322,7 @@ const runSimulation = (config) => {
       avgSwitchedWaitSec: parseFloat(avgSwitchedWait.toFixed(2)),
       avgNotSwitchedWaitSec: parseFloat(avgNotSwitchedWait.toFixed(1)),
       avgWaitSecSeason: parseFloat(avgWaitSecSeason.toFixed(1)),
+      avgSeasonalWaitSec: parseFloat(avgSeasonalWait.toFixed(1)),
     }
   };
 };

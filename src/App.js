@@ -28,6 +28,7 @@ export default function App() {
 
     // Calculate metrics for history
     const peakArrival = Math.max(...data.timelineData.map(d => d.arrivals));
+    const peakSeasonalArrival = Math.max(...data.timelineData.map(d => d.arrivalsSeasonal));
 
     const activatedTasks = [
       params.addUltras && "Ultras",
@@ -39,11 +40,13 @@ export default function App() {
       runId: `run_${String(history.length).padStart(3, '0')}`,
       timestamp: new Date().toLocaleString(),
       numGates: params.numGates,
+      numSeasonGates: params.numSeasonGates,
       expectedFans: params.totalFans,
       spread: params.distParams.stdDev,
       distType: params.distType,
       activatedTasks,
       peakArrival,
+      peakSeasonalArrival,
       insideByKickoff: data.stats.insideByKickoff,
       avgWaitTime: data.stats.avgWaitSec,
       missedKickoff: data.stats.missedKickoffCount,
@@ -51,6 +54,9 @@ export default function App() {
       laneChanges: data.stats.totalLaneChanges || 0,
       avgSwitchedWait: data.stats.avgSwitchedWaitSec,
       avgNotSwitchedWait: data.stats.avgNotSwitchedWaitSec,
+      avgSeasonalWait: data.stats.avgSeasonalWaitSec,
+      setMean: params.distParams.mean,
+      setVIPMean: params.distParams.seasonMean,
 
       // ✅ add this
       timelineData: data.timelineData
